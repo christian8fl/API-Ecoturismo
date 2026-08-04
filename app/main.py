@@ -1,20 +1,20 @@
 from fastapi import FastAPI
+from app.config.database import engine, Base
+from app.routes import cabanas, reservas
+
+# Crear automáticamente las tablas en MySQL si no existen
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Shopping API",
+    title="API Ecoturismo",
+    description="API REST para la gestión de reservas y servicios ecoturísticos",
     version="1.0.0"
 )
 
-@app.get("/")
-def home():
-    return {
-        "message": "Shopping API funcionando correctamente"
-    }
+# Incluir Routers
+app.include_router(cabanas.router)
+app.include_router(reservas.router)
 
-@app.get("/sumar")
-def sumar(a: float, b: float):
-    return {
-        "numero1": a,
-        "numero2": b,
-        "resultado": a + b
-    }
+@app.get("/")
+def read_root():
+    return {"mensaje": "Bienvenido a la API REST de Ecoturismo"}
