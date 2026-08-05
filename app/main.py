@@ -1,20 +1,14 @@
 from fastapi import FastAPI
-from app.config.database import engine, Base
-from app.routes import cabanas, reservas
-
-# Crear automáticamente las tablas en MySQL si no existen
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="API Ecoturismo",
-    description="API REST para la gestión de reservas y servicios ecoturísticos",
+    title="API Ruta Ecológica Turística Toisán",
+    description="Backend para la gestión de ecoturismo, alojamientos, actividades y carrito de compras.",
     version="1.0.0"
 )
 
-# Incluir Routers
-app.include_router(cabanas.router)
-app.include_router(reservas.router)
-
 @app.get("/")
 def read_root():
-    return {"mensaje": "Bienvenido a la API REST de Ecoturismo"}
+    return {
+        "message": "Bienvenido a la API REST de la Ruta Ecológica Turística Toisán",
+        "status": "Conectado y funcionando"
+    }

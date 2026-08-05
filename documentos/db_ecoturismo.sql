@@ -16,132 +16,93 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`db_ecoturismo` /*!40100 DEFAULT CHARACT
 
 USE `db_ecoturismo`;
 
-/*Table structure for table `tbl_actividad` */
+/*Table structure for table `actividades` */
 
-DROP TABLE IF EXISTS `tbl_actividad`;
+DROP TABLE IF EXISTS `actividades`;
 
-CREATE TABLE `tbl_actividad` (
-  `act_id` int(11) NOT NULL AUTO_INCREMENT,
-  `act_nombre` varchar(100) NOT NULL,
-  `act_descripcion` text DEFAULT NULL,
-  `act_precio` decimal(10,2) NOT NULL,
-  `act_est` char(1) NOT NULL DEFAULT 'A',
-  PRIMARY KEY (`act_id`)
+CREATE TABLE `actividades` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `costo` decimal(10,2) NOT NULL,
+  `duracion_horas` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-/*Data for the table `tbl_actividad` */
+/*Data for the table `actividades` */
 
-/*Table structure for table `tbl_cabana` */
+/*Table structure for table `alojamientos` */
 
-DROP TABLE IF EXISTS `tbl_cabana`;
+DROP TABLE IF EXISTS `alojamientos`;
 
-CREATE TABLE `tbl_cabana` (
-  `cab_id` int(11) NOT NULL AUTO_INCREMENT,
-  `cab_num` varchar(20) NOT NULL,
-  `cab_cap` int(11) NOT NULL,
-  `cab_pre` decimal(10,2) NOT NULL,
-  `cab_est` char(1) NOT NULL DEFAULT 'A',
-  PRIMARY KEY (`cab_id`),
-  UNIQUE KEY `uq_cabana_num` (`cab_num`)
+CREATE TABLE `alojamientos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `precio_noche` decimal(10,2) NOT NULL,
+  `capacidad` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-/*Data for the table `tbl_cabana` */
+/*Data for the table `alojamientos` */
 
-/*Table structure for table `tbl_huesped` */
+/*Table structure for table `reserva_actividades` */
 
-DROP TABLE IF EXISTS `tbl_huesped`;
+DROP TABLE IF EXISTS `reserva_actividades`;
 
-CREATE TABLE `tbl_huesped` (
-  `hue_id` int(11) NOT NULL AUTO_INCREMENT,
-  `hue_nom` varchar(100) NOT NULL,
-  `hue_ape` varchar(100) NOT NULL,
-  `hue_cor` varchar(150) NOT NULL,
-  `hue_tel` varchar(15) DEFAULT NULL,
-  `hue_est` char(1) NOT NULL DEFAULT 'A',
-  PRIMARY KEY (`hue_id`),
-  UNIQUE KEY `uq_huesped_cor` (`hue_cor`)
+CREATE TABLE `reserva_actividades` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reserva_id` int(11) NOT NULL,
+  `actividad_id` int(11) NOT NULL,
+  `cantidad_personas` int(11) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `reserva_id` (`reserva_id`),
+  KEY `actividad_id` (`actividad_id`),
+  CONSTRAINT `reserva_actividades_ibfk_1` FOREIGN KEY (`reserva_id`) REFERENCES `reservas` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reserva_actividades_ibfk_2` FOREIGN KEY (`actividad_id`) REFERENCES `actividades` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-/*Data for the table `tbl_huesped` */
+/*Data for the table `reserva_actividades` */
 
-/*Table structure for table `tbl_pago` */
+/*Table structure for table `reservas` */
 
-DROP TABLE IF EXISTS `tbl_pago`;
+DROP TABLE IF EXISTS `reservas`;
 
-CREATE TABLE `tbl_pago` (
-  `pag_id` int(11) NOT NULL AUTO_INCREMENT,
-  `res_id` int(11) NOT NULL,
-  `pag_fecha` datetime NOT NULL,
-  `pag_monto` decimal(10,2) NOT NULL,
-  `pag_metodo` varchar(50) NOT NULL DEFAULT 'Efectivo',
-  `pag_est` char(1) NOT NULL DEFAULT 'A',
-  PRIMARY KEY (`pag_id`),
-  KEY `fk_pago_reserva` (`res_id`),
-  CONSTRAINT `fk_pago_reserva` FOREIGN KEY (`res_id`) REFERENCES `tbl_reserva` (`res_id`) ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE `reservas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `usuario_id` int(11) NOT NULL,
+  `alojamiento_id` int(11) NOT NULL,
+  `fecha_inicio` date NOT NULL,
+  `fecha_fin` date NOT NULL,
+  `estado` enum('pendiente','confirmada','cancelada') DEFAULT 'pendiente',
+  `total` decimal(10,2) NOT NULL,
+  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `usuario_id` (`usuario_id`),
+  KEY `alojamiento_id` (`alojamiento_id`),
+  CONSTRAINT `reservas_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reservas_ibfk_2` FOREIGN KEY (`alojamiento_id`) REFERENCES `alojamientos` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-/*Data for the table `tbl_pago` */
+/*Data for the table `reservas` */
 
-/*Table structure for table `tbl_reserva` */
+/*Table structure for table `usuarios` */
 
-DROP TABLE IF EXISTS `tbl_reserva`;
+DROP TABLE IF EXISTS `usuarios`;
 
-CREATE TABLE `tbl_reserva` (
-  `res_id` int(11) NOT NULL AUTO_INCREMENT,
-  `usu_id` int(11) NOT NULL,
-  `hue_id` int(11) NOT NULL,
-  `cab_id` int(11) NOT NULL,
-  `res_fec_ini` date NOT NULL,
-  `res_fec_fin` date NOT NULL,
-  `res_tot` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `res_est` char(1) NOT NULL DEFAULT 'A',
-  PRIMARY KEY (`res_id`),
-  KEY `fk_reserva_usuario` (`usu_id`),
-  KEY `fk_reserva_huesped` (`hue_id`),
-  KEY `fk_reserva_cabana` (`cab_id`),
-  CONSTRAINT `fk_reserva_cabana` FOREIGN KEY (`cab_id`) REFERENCES `tbl_cabana` (`cab_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_reserva_huesped` FOREIGN KEY (`hue_id`) REFERENCES `tbl_huesped` (`hue_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_reserva_usuario` FOREIGN KEY (`usu_id`) REFERENCES `tbl_usuario` (`usu_id`) ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE `usuarios` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `rol` enum('cliente','administrador') DEFAULT 'cliente',
+  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-/*Data for the table `tbl_reserva` */
-
-/*Table structure for table `tbl_reserva_actividad` */
-
-DROP TABLE IF EXISTS `tbl_reserva_actividad`;
-
-CREATE TABLE `tbl_reserva_actividad` (
-  `ract_id` int(11) NOT NULL AUTO_INCREMENT,
-  `res_id` int(11) NOT NULL,
-  `act_id` int(11) NOT NULL,
-  `ract_cantidad` int(11) NOT NULL DEFAULT 1,
-  `ract_precio_unitario` decimal(10,2) NOT NULL,
-  `ract_subtotal` decimal(10,2) NOT NULL,
-  PRIMARY KEY (`ract_id`),
-  KEY `fk_ract_reserva` (`res_id`),
-  KEY `fk_ract_actividad` (`act_id`),
-  CONSTRAINT `fk_ract_actividad` FOREIGN KEY (`act_id`) REFERENCES `tbl_actividad` (`act_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_ract_reserva` FOREIGN KEY (`res_id`) REFERENCES `tbl_reserva` (`res_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-/*Data for the table `tbl_reserva_actividad` */
-
-/*Table structure for table `tbl_usuario` */
-
-DROP TABLE IF EXISTS `tbl_usuario`;
-
-CREATE TABLE `tbl_usuario` (
-  `usu_id` int(11) NOT NULL AUTO_INCREMENT,
-  `usu_nombre` varchar(100) NOT NULL,
-  `usu_correo` varchar(150) NOT NULL,
-  `usu_clave` varchar(255) NOT NULL,
-  `usu_rol` varchar(50) NOT NULL DEFAULT 'Recepcionista',
-  `usu_est` char(1) NOT NULL DEFAULT 'A',
-  PRIMARY KEY (`usu_id`),
-  UNIQUE KEY `uq_usuario_correo` (`usu_correo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-/*Data for the table `tbl_usuario` */
+/*Data for the table `usuarios` */
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
